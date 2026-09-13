@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 using System;
 using System.Globalization;
 using System.IO;
@@ -22,22 +22,25 @@ namespace Store_EF.Models.Extensions
             {
                 var primaryGallery = store.Galleries.FirstOrDefault(x => x.IsPrimary == true && x.ProductId == p.ProductId);
 
-                // Kiểm tra nếu primaryGallery không phải là null
-                if (primaryGallery != null)
+                if (primaryGallery != null && !string.IsNullOrEmpty(primaryGallery.Thumbnail))
                 {
                     string thumbnail = primaryGallery.Thumbnail;
-                    string thumbnailPath = Path.Combine(HttpContext.Current.Server.MapPath("~"), "Public/Imgs/Products", thumbnail);
+                    string basePath = HttpContext.Current != null
+                        ? HttpContext.Current.Server.MapPath("~")
+                        : AppDomain.CurrentDomain.BaseDirectory;
+
+                    string thumbnailPath = Path.Combine(basePath, "Public", "Imgs", "Products", thumbnail);
 
                     if (File.Exists(thumbnailPath))
                         return thumbnail;
                 }
 
                 // Trả về hình ảnh mặc định nếu không tìm thấy thumbnail
-                return "null.png";
+                return "default-thumbnail.jpg";
             }
             catch
             {
-                return "null.png"; // Trả về hình ảnh mặc định nếu có ngoại lệ
+                return "default-thumbnail.jpg"; // Trả về hình ảnh mặc định nếu có ngoại lệ
             }
         }
 

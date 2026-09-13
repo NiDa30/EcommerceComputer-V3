@@ -1,4 +1,4 @@
-﻿@using Store_EF.Models
+@using Store_EF.Models
 @model Product
 
 @{
@@ -93,10 +93,11 @@
             <!-- Khung ảnh thumbnail lớn chính giữa -->
             <div class="add-product__form-picture-thumbnail" onclick="document.getElementById('picture1').click()">
                 @{
-                    var primaryGallery = galleries.FirstOrDefault(g => g.IsPrimary);
+                    var primaryGallery = galleries != null ? galleries.FirstOrDefault(g => g.IsPrimary) : null;
+                    var primaryThumb = (primaryGallery != null && !string.IsNullOrEmpty(primaryGallery.Thumbnail)) ? primaryGallery.Thumbnail : "default-thumbnail.jpg";
                 }
                 <img id="preview1"
-                     src="~/public/imgs/products/@(primaryGallery != null ? primaryGallery.Thumbnail : "default-thumbnail.png")"
+                     src="@Url.Content("~/Public/Imgs/Products/" + primaryThumb)"
                      alt="Click to select image" />
                 <input type="file" name="thumbnailFile" id="picture1" accept="image/*" onchange="previewImage(this, 'preview1')" style="display: none;" />
             </div>
@@ -111,8 +112,9 @@
                     // Hiển thị các ảnh đã có
                     foreach (var gallery in galleries.Where(g => !g.IsPrimary))
                     {
+                        var galleryThumb = !string.IsNullOrEmpty(gallery.Thumbnail) ? gallery.Thumbnail : "default-image.jpg";
                         <div class="add-product__form-picture-item-container" onclick="document.getElementById('file-input-@gallery.GalleryId').click()">
-                            <img id="image-preview-@gallery.GalleryId" class="add-product__form-picture-item" src="~/public/imgs/products/@gallery.Thumbnail" alt="Click to upload an image" data-gallery-id="@gallery.GalleryId">
+                            <img id="image-preview-@gallery.GalleryId" class="add-product__form-picture-item" src="@Url.Content("~/Public/Imgs/Products/" + galleryThumb)" alt="Click to upload an image" data-gallery-id="@gallery.GalleryId">
                             <input type="file" name="galleries" id="file-input-@gallery.GalleryId" class="file-input" data-gallery-id="@gallery.GalleryId" style="display: none;" accept="image/*" onchange="previewImage(this, 'image-preview-@gallery.GalleryId')" />
                             <input type="hidden" name="galleryIds" value="@gallery.GalleryId" />
                         </div>
@@ -122,7 +124,7 @@
                     for (var i = existingImagesCount; i < 4; i++)
                     {
                         <div class="add-product__form-picture-item" onclick="document.getElementById('new-image-input-@i').click()">
-                            <img id="new-image-preview-@i" src="~/public/imgs/products/default-image.jpg" alt="Click to select image" />
+                            <img id="new-image-preview-@i" src="@Url.Content("~/Public/Imgs/Products/default-image.jpg")" alt="Click to select image" />
                             <input type="file" name="newGalleries" id="new-image-input-@i" accept="image/*" onchange="previewNewImage(this, 'new-image-preview-@i')" style="display: none;" />
                         </div>
 
@@ -134,7 +136,7 @@
                     for (var i = 0; i < 4; i++)
                     {
                         <div class="add-product__form-picture-item" onclick="document.getElementById('new-image-input-@i').click()">
-                            <img id="new-image-preview-@i" src="~/public/imgs/products/default-image.jpg" alt="Click to select image" />
+                            <img id="new-image-preview-@i" src="@Url.Content("~/Public/Imgs/Products/default-image.jpg")" alt="Click to select image" />
                             <input type="file" name="newGalleries" id="new-image-input-@i" accept="image/*" onchange="previewNewImage(this, 'new-image-preview-@i')" style="display: none;" />
                         </div>
 

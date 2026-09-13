@@ -1,4 +1,12 @@
-﻿﻿create database Store
+USE master;
+GO
+IF EXISTS (SELECT name FROM sys.databases WHERE name = 'Store')
+BEGIN
+    ALTER DATABASE Store SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE Store;
+END
+GO
+create database Store
 GO
 USE Store
 GO
@@ -98,47 +106,45 @@ CREATE TRIGGER Tri_AddProduct ON Product
 AFTER INSERT
 AS
 BEGIN
-	DECLARE @Id INT = (SELECT ProductId from inserted)
-	INSERT INTO Gallery (ProductId, IsPrimary) VALUES (@Id, 1)
+	INSERT INTO Gallery (ProductId, IsPrimary)
+	SELECT ProductId, 1 FROM inserted;
 END
-
 GO
+
 CREATE TRIGGER Tri_AddUserDetail ON User@
 AFTER INSERT
 AS
 BEGIN
-	DECLARE @Id INT = (SELECT UserId from inserted)
-	DECLARE @Email VARCHAR(320) = (SELECT Email FROM User@ WHERE UserId = @Id)
-	INSERT INTO UserDetail (UserId, Name) VALUES (@Id, SUBSTRING(@Email, 1, CHARINDEX('@', @Email) - 1))
+	INSERT INTO UserDetail (UserId, Name)
+	SELECT UserId, SUBSTRING(Email, 1, CHARINDEX('@', Email) - 1)
+	FROM inserted;
 END
 GO
 
 CREATE TRIGGER Tri_AddGallery ON Gallery
-FOR INSERT
+AFTER INSERT, UPDATE
 AS
 BEGIN
-	DECLARE @ProductId INT = (SELECT ProductId FROM inserted)
-	IF EXISTS(SELECT * FROM inserted WHERE IsPrimary = 1)
+	DECLARE @ProductId INT = (SELECT TOP 1 ProductId FROM inserted)
+	IF (SELECT COUNT(*) FROM Gallery WHERE IsPrimary = 1 AND ProductId = @ProductId) > 1
 	BEGIN
-		IF (SELECT COUNT(*) FROM Gallery WHERE IsPrimary = 1 AND ProductId = @ProductId) = 0
-			COMMIT TRAN
-		ELSE
-			ROLLBACK TRAN
+		RAISERROR ('Each product can only have one primary image.', 16, 1);
+		ROLLBACK TRANSACTION;
 	END
-	ELSE
-		COMMIT TRAN
 END
+GO
 
 
 
--- Thêm tài khoản người dùng
+
+-- Thêm tài khoản người dùng (Mật khẩu mặc định: 123456)
 INSERT INTO User@ (RoleName, Email, Password)
 VALUES 
-('Admin', 'admin1@example.com', '$2y$10$f6aTCo72j1YVSnO2kYqSfu1twbdhZdU3qN3R6PWIQKPY99geHvVD.'),
-('User', 'user1@example.com', '$2y$10$eo2MugDWT/NbZ9oNlhNFJOEhRtD9cVJc87//.pFJH3EDqZMuUMmza'),
-('Employee', 'employee1@example.com', '$2y$10$3itQ6m7Z6NiYXMwln0HLpukKTCkyLkO3eTglR.F1Y6/C92ECBGWsC'),
-('Admin', 'admin2@example.com', '$2y$10$/r.6OrFwenI/C3o9y.Bafu7hKaVe/BNRkImylSG.bytaJB1exeDY2'),
-('User', 'user2@example.com', '$2y$10$ZF7vrHTFqZ8oIIfk0.1W2..OVZf7YUnzRo8DzwPlO8Xq.QBn7ARWW')
+('Admin', 'admin1@example.com', '$2a$11$l55UTt/T80OfIKiF7vo6d.f7jXEVUlJbXcam6fFtzOs4rkBuCs3d2'),
+('User', 'user1@example.com', '$2a$11$l55UTt/T80OfIKiF7vo6d.f7jXEVUlJbXcam6fFtzOs4rkBuCs3d2'),
+('Employee', 'employee1@example.com', '$2a$11$l55UTt/T80OfIKiF7vo6d.f7jXEVUlJbXcam6fFtzOs4rkBuCs3d2'),
+('Admin', 'admin2@example.com', '$2a$11$l55UTt/T80OfIKiF7vo6d.f7jXEVUlJbXcam6fFtzOs4rkBuCs3d2'),
+('User', 'user2@example.com', '$2a$11$l55UTt/T80OfIKiF7vo6d.f7jXEVUlJbXcam6fFtzOs4rkBuCs3d2')
 
 -- Thêm thương hiệu
 INSERT INTO Brand (Name)
@@ -187,19 +193,47 @@ VALUES
 (N'Dell XPS 13 - Version 19', 10, 20000000, 18500000, N'Laptop Dell XPS 13 bản nâng cao', 1, 1),
 (N'Dell XPS 13 - Version 20', 12, 21000000, 18500000, N'Laptop Dell XPS 13 hiệu năng tuyệt vời', 1, 1)
 
--- Thêm hình ảnh sản phẩm
-INSERT INTO Gallery (Thumbnail, ProductId)
+-- Cập nhật hình ảnh sản phẩm chính (Thumbnail)
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13.jpg' WHERE ProductId = 1 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_hp_pavilion.jpg' WHERE ProductId = 2 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_asus_zenbook.jpg' WHERE ProductId = 3 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_lenovo_thinkpad.jpg' WHERE ProductId = 4 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_acer_aspire.jpg' WHERE ProductId = 5 AND IsPrimary = 1;
+
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v1.jpg' WHERE ProductId = 6 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v2.jpg' WHERE ProductId = 7 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v3.jpg' WHERE ProductId = 8 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v4.jpg' WHERE ProductId = 9 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v5.jpg' WHERE ProductId = 10 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v6.jpg' WHERE ProductId = 11 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v7.jpg' WHERE ProductId = 12 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v8.jpg' WHERE ProductId = 13 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v9.jpg' WHERE ProductId = 14 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v10.jpg' WHERE ProductId = 15 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v11.jpg' WHERE ProductId = 16 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v12.jpg' WHERE ProductId = 17 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v13.jpg' WHERE ProductId = 18 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v14.jpg' WHERE ProductId = 19 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v15.jpg' WHERE ProductId = 20 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v16.jpg' WHERE ProductId = 21 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v17.jpg' WHERE ProductId = 22 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v18.jpg' WHERE ProductId = 23 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v19.jpg' WHERE ProductId = 24 AND IsPrimary = 1;
+UPDATE Gallery SET Thumbnail = 'thumbnail_dell_xps_13_v20.jpg' WHERE ProductId = 25 AND IsPrimary = 1;
+
+-- Thêm hình ảnh thư viện phụ
+INSERT INTO Gallery (Thumbnail, ProductId, IsPrimary)
 VALUES 
-('gallery_dell_xps_13_1.jpg', 3),	
-('gallery_dell_xps_13_2.jpg', 3),
-('gallery_hp_pavilion_1.jpg', 4),
-('gallery_hp_pavilion_2.jpg', 5),
-('gallery_asus_zenbook_1.jpg', 3),
-('gallery_asus_zenbook_2.jpg', 3),
-('gallery_lenovo_thinkpad_1.jpg', 4),
-('gallery_lenovo_thinkpad_2.jpg', 4),
-('gallery_acer_aspire_1.jpg', 5),
-('gallery_acer_aspire_2.jpg', 5)
+('gallery_dell_xps_13_1.jpg', 1, 0),	
+('gallery_dell_xps_13_2.jpg', 1, 0),
+('gallery_hp_pavilion_1.jpg', 2, 0),
+('gallery_hp_pavilion_2.jpg', 2, 0),
+('gallery_asus_zenbook_1.jpg', 3, 0),
+('gallery_asus_zenbook_2.jpg', 3, 0),
+('gallery_lenovo_thinkpad_1.jpg', 4, 0),
+('gallery_lenovo_thinkpad_2.jpg', 4, 0),
+('gallery_acer_aspire_1.jpg', 5, 0),
+('gallery_acer_aspire_2.jpg', 5, 0)
 
 GO
 CREATE PROC AddCart @userId INT, @productId INT
@@ -222,13 +256,4 @@ BEGIN
 	END
 
 END
--- Data Source=LAPTOP-97V7GE72\SQLEXPRESS;Initial Catalog=Store;Integrated Security=True
 
-select * from [dbo].[UserDetail]
-
-select * from User@
-
-
-delete User@
-
-END

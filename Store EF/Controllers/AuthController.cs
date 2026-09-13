@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 using Store_EF.Models;
 using System;
 using System.Linq;
@@ -62,10 +62,15 @@ namespace Store_EF.Controllers
         [HttpPost]
         public ActionResult SignIn(string email, string password)
         {
-            User_ user = null;
             try
             {
-                user = store.Users.Where(x => x.Email.Equals(email)).First();
+                var user = store.Users.FirstOrDefault(x => x.Email == email);
+                if (user == null)
+                {
+                    ModelState.AddModelError("Email", "Email không tồn tại!");
+                    return View();
+                }
+
                 if (BCrypt.Net.BCrypt.Verify(password, user.Password))
                 {
                     Session["UserId"] = user.UserId;
@@ -79,9 +84,10 @@ namespace Store_EF.Controllers
                     return View();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                ModelState.AddModelError("Email", "Email không tồn tại!");
+                Log.Error(ex.ToString());
+                ModelState.AddModelError("Email", "Lỗi xử lý đăng nhập! Vui lòng thử lại.");
                 return View();
             }
         }

@@ -1,4 +1,4 @@
-﻿@using Store_EF.Models
+@using Store_EF.Models
 @model PagedList.IPagedList<Product>
 @using PagedList.Mvc;
 @using PagedList;
@@ -44,7 +44,7 @@
                         <td class="pm__table-item" scope="row">@p.ProductId</td>
                         <td class="pm__table-item">
                             <img class="pm__table-item-img"
-                                 src="~/Public/Imgs/Products/@p.Thumbnail(store)"
+                                 src="@Url.Content("~/Public/Imgs/Products/" + p.Thumbnail(store))"
                                  alt="" />
                         </td>
                         <td class="pm__table-item">@p.Title</td>

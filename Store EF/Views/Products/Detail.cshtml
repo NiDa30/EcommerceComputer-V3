@@ -1,4 +1,4 @@
-﻿@using Store_EF.Models
+@using Store_EF.Models
 @using Store_EF.Models.Extensions;
 @model Product
 @{
@@ -36,8 +36,9 @@
                             <div class="prod-preview__list">
                                 @foreach (Gallery gallery in ViewBag.Galleries)
                                 {
+                                    string gThumb = !string.IsNullOrEmpty(gallery.Thumbnail) ? gallery.Thumbnail : "default-image.jpg";
                                     <div class="prod-preview__item">
-                                        <img src="~/Public/Imgs/Products/@gallery.Thumbnail"
+                                        <img src="@Url.Content("~/Public/Imgs/Products/" + gThumb)"
                                              alt=""
                                              class="prod-preview__img" />
                                     </div>
@@ -46,7 +47,8 @@
                             <div class="prod-preview__thumbs d-md-none">
                                 @foreach (Gallery gallery in ViewBag.Galleries)
                                 {
-                                    <img src="~/Public/Imgs/Products/@gallery.Thumbnail"
+                                    string gThumb = !string.IsNullOrEmpty(gallery.Thumbnail) ? gallery.Thumbnail : "default-image.jpg";
+                                    <img src="@Url.Content("~/Public/Imgs/Products/" + gThumb)"
                                          alt=""
                                          class="prod-preview__thumb-img prod-preview__thumb-img--current" />
                                 }

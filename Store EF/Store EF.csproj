@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -314,6 +314,18 @@
     <Content Include="Public\imgs\products\thumbnail_dell_xps_13_v7.jpg" />
     <Content Include="Public\imgs\products\thumbnail_hp_pavilion.jpg" />
     <Content Include="Public\imgs\products\thumbnail_lenovo_thinkpad.jpg" />
+    <Content Include="Public\imgs\products\gallery_hp_pavilion_1.jpg" />
+    <Content Include="Public\imgs\products\gallery_hp_pavilion_2.jpg" />
+    <Content Include="Public\imgs\products\gallery_asus_zenbook_1.jpg" />
+    <Content Include="Public\imgs\products\gallery_asus_zenbook_2.jpg" />
+    <Content Include="Public\imgs\products\gallery_lenovo_thinkpad_1.jpg" />
+    <Content Include="Public\imgs\products\gallery_lenovo_thinkpad_2.jpg" />
+    <Content Include="Public\imgs\products\gallery_acer_aspire_1.jpg" />
+    <Content Include="Public\imgs\products\gallery_acer_aspire_2.jpg" />
+    <Content Include="Public\imgs\products\default-thumbnail.jpg" />
+    <Content Include="Public\imgs\products\default-thumbnail.png" />
+    <Content Include="Public\imgs\products\default-image.jpg" />
+    <Content Include="Public\imgs\products\null.png" />
     <Content Include="Public\imgs\profile.svg" />
     <Content Include="Public\imgs\search-icon.svg" />
     <Content Include="Public\imgs\twitter.svg" />
@@ -443,7 +455,7 @@
     <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.props'))" />
     <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.targets'))" />
   </Target>
-  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets')" />
+  <!-- <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets')" /> -->
   <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

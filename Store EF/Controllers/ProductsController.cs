@@ -1,4 +1,4 @@
-﻿using PagedList;
+using PagedList;
 using Serilog;
 using Store_EF.Models;
 using Store_EF.Models.Extensions;
@@ -98,7 +98,7 @@ namespace Store_EF.Controllers
         [HttpPost]
         public ActionResult Add(Product p, HttpPostedFileBase thumbnail, IEnumerable<HttpPostedFileBase> galleries = null)
         {
-            if (p.IsValid() && Helpers.IsValidImage(thumbnail.InputStream))
+            if (p.IsValid() && thumbnail != null && thumbnail.ContentLength > 0 && Helpers.IsValidImage(thumbnail.InputStream))
             {
                 int productId;
                 if (!p.AddToDb(store, out productId))
@@ -106,24 +106,44 @@ namespace Store_EF.Controllers
 
                 try
                 {
-                    Gallery g = store.Galleries.Where(x => x.ProductId == productId && x.IsPrimary == true).First();
+                    string uploadDir = Path.Combine(Server.MapPath("~"), "Public", "Imgs", "Products");
+                    if (!Directory.Exists(uploadDir))
+                        Directory.CreateDirectory(uploadDir);
+
+                    Gallery g = store.Galleries.FirstOrDefault(x => x.ProductId == productId && x.IsPrimary == true);
                     string fName = $"{Guid.NewGuid()}{Path.GetExtension(thumbnail.FileName)}";
-                    g.Thumbnail = fName;
-                    string path = Path.Combine(Server.MapPath("~"), $"Public\\Imgs\\Products\\{fName}");
-                    if (!Directory.GetParent(path).Exists)
-                        Directory.GetParent(path).Create();
+                    string path = Path.Combine(uploadDir, fName);
                     thumbnail.SaveAs(path);
-                    foreach (var item in galleries)
+
+                    if (g != null)
                     {
-                        if (item == null) continue;
-                        fName = $"{Guid.NewGuid()}{Path.GetExtension(item.FileName)}";
-                        Gallery gallery = new Gallery()
+                        g.Thumbnail = fName;
+                    }
+                    else
+                    {
+                        store.Galleries.Add(new Gallery
                         {
                             ProductId = productId,
-                            Thumbnail = fName
-                        };
-                        store.Galleries.Add(gallery);
-                        item.SaveAs(Path.Combine(Server.MapPath("~"), $"Public\\Imgs\\Products\\{fName}"));
+                            Thumbnail = fName,
+                            IsPrimary = true
+                        });
+                    }
+
+                    if (galleries != null)
+                    {
+                        foreach (var item in galleries)
+                        {
+                            if (item == null || item.ContentLength == 0) continue;
+                            string galleryName = $"{Guid.NewGuid()}{Path.GetExtension(item.FileName)}";
+                            Gallery gallery = new Gallery()
+                            {
+                                ProductId = productId,
+                                Thumbnail = galleryName,
+                                IsPrimary = false
+                            };
+                            store.Galleries.Add(gallery);
+                            item.SaveAs(Path.Combine(uploadDir, galleryName));
+                        }
                     }
                     store.SaveChanges();
                 }
@@ -137,7 +157,7 @@ namespace Store_EF.Controllers
             }
             else
             {
-                ModelState.AddModelError("Err", "Thêm sản phẩm thất bại");
+                ModelState.AddModelError("Err", "Thêm sản phẩm thất bại. Vui lòng kiểm tra thông tin và hình ảnh hợp lệ.");
                 return Add();
             }
         }
@@ -211,18 +231,34 @@ namespace Store_EF.Controllers
                 return HttpNotFound();
             }
 
+            string uploadDir = Path.Combine(Server.MapPath("~"), "Public", "Imgs", "Products");
+            if (!Directory.Exists(uploadDir))
+                Directory.CreateDirectory(uploadDir);
+
             // Xử lý ảnh thumbnail
             var galleryThumb = store.Galleries.FirstOrDefault(g => g.ProductId == product.ProductId && g.IsPrimary == true);
             if (thumbnailFile != null && thumbnailFile.ContentLength > 0)
             {
                 try
                 {
-                    string fileName = Path.GetFileName(thumbnailFile.FileName);
-                    string path = Path.Combine(Server.MapPath("~\\public\\imgs\\products\\"), fileName);
+                    string fName = $"{Guid.NewGuid()}{Path.GetExtension(thumbnailFile.FileName)}";
+                    string path = Path.Combine(uploadDir, fName);
 
                     // Lưu tệp thumbnail
                     thumbnailFile.SaveAs(path);
-                    galleryThumb.Thumbnail = fileName;
+                    if (galleryThumb != null)
+                    {
+                        galleryThumb.Thumbnail = fName;
+                    }
+                    else
+                    {
+                        store.Galleries.Add(new Gallery
+                        {
+                            ProductId = product.ProductId,
+                            Thumbnail = fName,
+                            IsPrimary = true
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -245,11 +281,11 @@ namespace Store_EF.Controllers
                         {
                             try
                             {
-                                string fileName = Path.GetFileName(file.FileName);
-                                string path = Path.Combine(Server.MapPath("~\\public\\imgs\\products\\"), fileName);
+                                string fName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                                string path = Path.Combine(uploadDir, fName);
 
                                 file.SaveAs(path);
-                                galleryItem.Thumbnail = fileName;
+                                galleryItem.Thumbnail = fName;
                             }
                             catch (Exception ex)
                             {
@@ -271,8 +307,8 @@ namespace Store_EF.Controllers
                     {
                         try
                         {
-                            string fileName = Path.GetFileName(newGallery.FileName);
-                            string path = Path.Combine(Server.MapPath("~\\public\\imgs\\products\\"), fileName);
+                            string fName = $"{Guid.NewGuid()}{Path.GetExtension(newGallery.FileName)}";
+                            string path = Path.Combine(uploadDir, fName);
 
                             newGallery.SaveAs(path);
 
@@ -280,7 +316,7 @@ namespace Store_EF.Controllers
                             var newGalleryItem = new Gallery
                             {
                                 ProductId = productId,
-                                Thumbnail = fileName,
+                                Thumbnail = fName,
                                 IsPrimary = false // Đánh dấu là ảnh phụ
                             };
                             store.Galleries.Add(newGalleryItem);
